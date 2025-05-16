@@ -1,0 +1,13 @@
+<script>
+  document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+    const desc = e.target.description.value;
+    const res = await fetch("http://localhost:3001/submit", { // changed port here
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description: desc })
+    });
+    const data = await res.json();
+    alert("Triage Level: " + data.triage_level);
+  }
+</script>
