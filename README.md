@@ -47,8 +47,8 @@ npm start
   <p>Here are 6 visuals from Metabase showing data analytics and dashboards connected to the Supabase DB:</p>
   <img src="Healthcare Triage/pictures/one.png" alt="Metabase Dashboard 1">
   <img src="Healthcare Triage/pictures/two.png" alt="Metabase Dashboard 2">
-  <img src="Healthcare Triage/pictures/tjree.png" alt="Metabase Dashboard 3">
-
+  <img src="Healthcare Triage/pictures/third.png" alt="Metabase Dashboard 3">
+  <img src="Healthcare Triage/pictures/four.png" alt="Metabase Dashboard 4">
   <h2>🧾 Schema</h2>
   <p>Run the following SQL in Supabase SQL Editor:</p>
   <pre>
