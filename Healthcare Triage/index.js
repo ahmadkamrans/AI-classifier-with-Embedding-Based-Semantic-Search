@@ -11,15 +11,15 @@ app.use(express.json());
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// POST /submit - classify and save to DB
 app.post("/submit", async (req, res) => {
   const { description } = req.body;
 
   const prompt = `Classify this patient symptom into one of the following categories: [Emergency, Urgent Care, Non-Urgent, Follow-Up Needed, Allergy, Infection]. Only return the label.\n\nSymptom: "${description}"`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // <- gpt-4o-mini equivalent
+    // 1. Get classification
+    const classification = await openai.chat.completions.create({
+      model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a medical triage classifier." },
         { role: "user", content: prompt }
@@ -27,20 +27,61 @@ app.post("/submit", async (req, res) => {
       temperature: 0,
     });
 
-    const triage_level = completion.choices[0].message.content.trim();
+    const triage_level = classification.choices[0].message.content.trim();
 
-    const { error } = await supabase
-      .from("symptom_reports")
-      .insert([{ symptom_description: description, triage_level }]);
+    // 2. Get embedding
+    const embeddingResponse = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: description,
+    });
+
+    const embedding = embeddingResponse.data[0].embedding;
+
+    // 3. Store in Supabase
+    const { error } = await supabase.from("symptom_reports").insert([
+      {
+        symptom_description: description,
+        triage_level,
+        embedding,
+      },
+    ]);
 
     if (error) return res.status(500).json({ error });
 
     res.json({ success: true, triage_level });
   } catch (error) {
-    console.error("OpenAI/Supabase error:", error);
-    res.status(500).json({ error: "Internal error" });
+    console.error("Error during classification/embedding:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+app.post("/semantic-search", async (req, res) => {
+  const { description } = req.body;
+
+  try {
+    // 1. Generate embedding for incoming symptom
+    const embeddingResponse = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: description,
+    });
+
+    const embedding = embeddingResponse.data[0].embedding;
+
+    // 2. Query Supabase with vector similarity
+    const { data, error } = await supabase.rpc("match_symptoms", {
+      query_embedding: embedding,
+      match_count: 5,
+    });
+
+    if (error) return res.status(500).json({ error });
+
+    res.json({ matches: data });
+  } catch (error) {
+    console.error("Semantic search error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 // GET /reports - return all symptom reports
 app.get("/reports", async (req, res) => {
