@@ -1,71 +1,91 @@
- <h1>AI Maintenance MVP (Phase 1)</h1>
+# Symptom Triage API (OpenAI + Pinecone)
 
-  <p><strong>Status:</strong> ✅ Initial MVP Completed</p>
+An Express.js API for healthcare triage using OpenAI (GPT-4 & Embeddings) and Pinecone vector database. Submit patient symptoms, classify urgency levels, and retrieve similar past cases for RAG (retrieval-augmented generation) triage.
 
-  <h2>📦 Features Included</h2>
-  <ul>
-    <li>🔍 AI classification via <strong>OpenAI GPT-4o</strong></li>
-    <li>📚 Supabase with PostgreSQL as the backend database</li>
-    <li>🌐 REST API endpoints using <code>Express.js</code></li>
-    <li>📈 Metabase-ready data structure for analytics</li>
-    <li>🛠️ SQL schema for reproducibility</li>
-    <li>🧪 Postman used for API testing</li>
-  </ul>
+---
 
-  <h2>🚀 How to Run</h2>
-  <ol>
-    <li>Create a Supabase project and execute the SQL schema provided in <code>schema.sql</code>.</li>
-    <li>Create a <code>.env</code> file and add the following keys:
-      <pre>
-OPENAI_API_KEY=your_openai_key
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_service_role_key
-      </pre>
-    </li>
-    <li>Run the backend server:
-      <pre>
+## Features
+
+- Classifies symptoms into categories: `Emergency`, `Urgent Care`, `Non-Urgent`, `Follow-Up Needed`, `Allergy`, `Infection`
+- Uses GPT-4 for classification and triage recommendation
+- Stores vector embeddings in Pinecone for similarity search
+- Retrieves past similar cases using Pinecone vector search
+- Testable via Postman
+
+---
+
+## Setup
+
+1. **Clone & install**
+
+```bash
+git clone <your-repo-url>
+cd <your-repo-folder>
 npm install
-npm start
-      </pre>
-    </li>
-    <li>Use the provided <code>index.html</code> file or Postman to test API endpoints.</li>
-    <li>Connect your Supabase DB to Metabase for data dashboarding.</li>
-  </ol>
+```
+## Environment variable
 
-  <h2>🧪 Postman API Testing</h2>
-  <p>Below are screenshots of API testing using Postman for endpoints like <code>/submit</code> and <code>/reports</code>:</p>
-  <img src="Healthcare Triage/pictures/allReports.png" alt="Postman Request 1">
-  <img src="Healthcare Triage/pictures/askGPT.png" alt="Postman Request 2">
-  <img src="Healthcare Triage/pictures/checkConnection.png" alt="Po![alt text](image.png)stman Request 3">
+2. **Create .env**
+```bash
+OPENAI_API_KEY=your-openai-key
+PINECONE_API_KEY=your-pinecone-key
+PINECONE_INDEX=your-pinecone-index-name
+```
 
-  <h2>🗃️ Supabase Setup</h2>
-  <p>Below are images from the Supabase dashboard showing the database schema and example data inserted:</p>
-  <img src="Healthcare Triage/pictures/SQL_editor.png" alt="Supabase Table View">
-  <img src="Healthcare Triage/pictures/TableView.png" alt="Supabase Data View">
+## Start the server
 
-  <h2>📊 Metabase Integration</h2>
-  <p>Here are 6 visuals from Metabase showing data analytics and dashboards connected to the Supabase DB:</p>
-  <img src="Healthcare Triage/pictures/one.png" alt="Metabase Dashboard 1">
-  <img src="Healthcare Triage/pictures/two.png" alt="Metabase Dashboard 2">
-  <img src="Healthcare Triage/pictures/third.png" alt="Metabase Dashboard 3">
-  <img src="Healthcare Triage/pictures/four.png" alt="Metabase Dashboard 4">
-  <h2>🧾 Schema</h2>
-  <p>Run the following SQL in Supabase SQL Editor:</p>
-  <pre>
-CREATE TABLE symptom_reports (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  symptom_description text,
-  triage_level text,
-  created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
-);
-  </pre>
+3. **Env**
+```bash
+node pine_Index.js
+```
 
-  <h2>🧠 AI Prompt Logic</h2>
-  <p>Prompt used for classification via OpenAI:</p>
-  <pre>
-Classify this patient symptom into one of the following categories: 
-[Emergency, Urgent Care, Non-Urgent, Follow-Up Needed, Allergy, Infection]. 
-Only return the label.
+## API Endpoints (Test in Postman API)
+4. **POST/submit**
+   Purpose:
+   Submit a symptom → Classifies it → Embeds it → Stores in Pinecone.
+   ```bash
+   {
+    "description": "Shortness of breath and chest pain"
+   }
+   ```
+  Response: 
+  ```bash
+    {
+        "success": true,
+        "data": {
+            "id": "report_...",
+            "symptom": "Shortness of breath and chest pain",
+            "triage_level": "Emergency",
+            "created_at": "...",
+            "embedding_sample": "0.023, -0.038, ...",
+            "vector_sample": [0.023, -0.038, ...],
+            "vector_dimensions": 1536
+        }
+    }
+    ```
+5. **POST/rag-triage**
+    Purpose:
+    Returns a triage recommendation using similar past reports (RAG).
+    Request:
+    ```bash
+    {
+        "description": "Persistent coughing with mild fever"
+    }
+    ```
+    Response:
+    ```bash
+    {
+    "recommendation": "Based on the symptoms ... this appears to require Urgent Care.",
+    "similar_cases": [
+        {
+        "id": "report_...",
+        "score": 0.92,
+        "symptom_description": "...",
+        "triage_level": "...",
+        "created_at": "..."
+        },
+        ...
+        ]
+    }
+    ```
 
-Symptom: "..."
-  </pre>
