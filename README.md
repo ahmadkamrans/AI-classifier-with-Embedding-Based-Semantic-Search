@@ -1,71 +1,60 @@
- <h1>AI Maintenance MVP (Phase 1)</h1>
+<h1>Healthcare Triage AI – Semantic Symptom Search</h1>
 
-  <p><strong>Status:</strong> ✅ Initial MVP Completed</p>
+  <p>
+    This project is a Minimal Viable Product (MVP) for a Healthcare Triage AI system. It uses OpenAI embeddings, Supabase with pgvector support, and optionally Pinecone for fast and scalable semantic search.
+  </p>
 
-  <h2>📦 Features Included</h2>
+  <hr />
+
+  <h2>What This Project Does</h2>
   <ul>
-    <li>🔍 AI classification via <strong>OpenAI GPT-4o</strong></li>
-    <li>📚 Supabase with PostgreSQL as the backend database</li>
-    <li>🌐 REST API endpoints using <code>Express.js</code></li>
-    <li>📈 Metabase-ready data structure for analytics</li>
-    <li>🛠️ SQL schema for reproducibility</li>
-    <li>🧪 Postman used for API testing</li>
+    <li>Generates vector embeddings from patient symptom descriptions using OpenAI.</li>
+    <li>Stores those embeddings in Supabase’s Postgres database with pgvector enabled.</li>
+    <li>Defines a PostgreSQL function to find and return similar historical symptom records based on vector similarity.</li>
+    <li>Includes an optional script to migrate stored vectors from Supabase to Pinecone for high-performance search use cases.</li>
   </ul>
 
-  <h2>🚀 How to Run</h2>
+  <hr />
+
+  <h2>Setup Instructions</h2>
+
+  <h3>1️⃣ Clone the Repository</h3>
+  <p>Use <strong>git clone</strong> to download the project locally.</p>
+
+  <h3>2️⃣ Install Dependencies</h3>
+  <p>Run <strong>npm install</strong> to install the required packages.</p>
+
+  <h3>3️⃣ Add Environment Variables</h3>
+  <p>
+    Create a <code>.env</code> file and provide your Supabase keys, Pinecone API key, and OpenAI API key.
+  </p>
+
+  <hr />
+
+  <h2>🔍 Code Flow Overview</h2>
+
   <ol>
-    <li>Create a Supabase project and execute the SQL schema provided in <code>schema.sql</code>.</li>
-    <li>Create a <code>.env</code> file and add the following keys:
-      <pre>
-OPENAI_API_KEY=your_openai_key
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_service_role_key
-      </pre>
-    </li>
-    <li>Run the backend server:
-      <pre>
-npm install
-npm start
-      </pre>
-    </li>
-    <li>Use the provided <code>index.html</code> file or Postman to test API endpoints.</li>
-    <li>Connect your Supabase DB to Metabase for data dashboarding.</li>
+    <li>The backend receives a user’s symptom description via an API request.</li>
+    <li>It sends the description to OpenAI to generate a semantic embedding vector.</li>
+    <li>This vector is passed into a custom SQL function (<code>match_symptoms</code>) in Supabase.</li>
+    <li>The SQL function returns the most similar stored symptom reports based on vector similarity using <code><=></code> operator.</li>
+    <li>Results are returned to the frontend with similarity scores for triage recommendation.</li>
   </ol>
 
-  <h2>🧪 Postman API Testing</h2>
-  <p>Below are screenshots of API testing using Postman for endpoints like <code>/submit</code> and <code>/reports</code>:</p>
-  <img src="Healthcare Triage/pictures/allReports.png" alt="Postman Request 1">
-  <img src="Healthcare Triage/pictures/askGPT.png" alt="Postman Request 2">
-  <img src="Healthcare Triage/pictures/checkConnection.png" alt="Po![alt text](image.png)stman Request 3">
+  <hr />
 
-  <h2>🗃️ Supabase Setup</h2>
-  <p>Below are images from the Supabase dashboard showing the database schema and example data inserted:</p>
-  <img src="Healthcare Triage/pictures/SQL_editor.png" alt="Supabase Table View">
-  <img src="Healthcare Triage/pictures/TableView.png" alt="Supabase Data View">
+  <h2>✅ Technologies Used</h2>
+  <ul>
+    <li>Node.js & Express – Server and API</li>
+    <li>OpenAI API – Embedding generation</li>
+    <li>Supabase (PostgreSQL + pgvector) – Vector storage & similarity search</li>
+  </ul>
 
-  <h2>📊 Metabase Integration</h2>
-  <p>Here are 6 visuals from Metabase showing data analytics and dashboards connected to the Supabase DB:</p>
-  <img src="Healthcare Triage/pictures/one.png" alt="Metabase Dashboard 1">
-  <img src="Healthcare Triage/pictures/two.png" alt="Metabase Dashboard 2">
-  <img src="Healthcare Triage/pictures/third.png" alt="Metabase Dashboard 3">
-  <img src="Healthcare Triage/pictures/four.png" alt="Metabase Dashboard 4">
-  <h2>🧾 Schema</h2>
-  <p>Run the following SQL in Supabase SQL Editor:</p>
-  <pre>
-CREATE TABLE symptom_reports (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  symptom_description text,
-  triage_level text,
-  created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
-);
-  </pre>
+  <hr />
 
-  <h2>🧠 AI Prompt Logic</h2>
-  <p>Prompt used for classification via OpenAI:</p>
-  <pre>
-Classify this patient symptom into one of the following categories: 
-[Emergency, Urgent Care, Non-Urgent, Follow-Up Needed, Allergy, Infection]. 
-Only return the label.
-
-Symptom: "..."
-  </pre>
+  <h2>📌 Notes</h2>
+  <ul>
+    <li>The system supports both local vector search via Supabase and external search via Pinecone.</li>
+    <li>Ensure that your Supabase database has the <code>pgvector</code> extension enabled.</li>
+    <li>For production use, consider adding error handling and authentication for secure usage.</li>
+  </ul>
