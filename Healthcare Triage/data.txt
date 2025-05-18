@@ -1,0 +1,78 @@
+// this is the data for the /rag-triage api which basically return the top 5k results based on the similarities with entries you already did in /submit api
+
+1. Clear Emergency Case (Should match #5)
+Test Input:
+"Crushing chest pain with left arm numbness and sweating"
+
+Expected Top Match:
+
+Emergency (severe chest pain)
+
+2. Urgent Care Scenario (Should match #4)
+Test Input:
+"Twisted ankle with noticeable swelling and bruising"
+
+Expected Top Match:
+
+Urgent Care (sprained ankle)
+
+3. Non-Urgent Case (Should match #1)
+Test Input:
+"Dull headache that comes and goes for two days"
+
+Expected Top Match:
+
+Non-Urgent (mild headache)
+
+4. Infection Case (Should match #2)
+Test Input:
+"High fever with painful swallowing and swollen tonsils"
+
+Expected Top Match:
+
+Infection (fever and sore throat)
+
+5. Allergy Symptoms (Should match #6)
+Test Input:
+"Runny nose with itchy eyes after garden work"
+
+Expected Top Match:
+
+Allergy (sneezing, itchy eyes)
+
+6. Follow-Up Needed (Should match #3)
+Test Input:
+"Cough lingering 3 weeks after a cold"
+
+Expected Top Match:
+
+Follow-Up Needed (persistent cough)
+
+7. Borderline Emergency
+Test Input:
+"Chest discomfort with shortness of breath"
+
+Expected Behavior:
+Should show both #5 (Emergency) and #1 (Non-Urgent) with lower scores
+
+8. Pediatric Case
+Test Input:
+"Child with 102°F fever and sore throat"
+
+Expected Behavior:
+Should match #2 (Infection) but may score lower due to "child" context
+
+9. Ambiguous Symptoms
+Test Input:
+"Headache with mild fever"
+
+Expected Behavior:
+Should show #1 (Non-Urgent) and #2 (Infection) with similar scores
+
+10. Completely New Symptom
+Test Input:
+"Sharp lower abdominal pain"
+
+Expected Behavior:
+No strong matches (low scores for all) since not in your existing data
+

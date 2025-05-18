@@ -1,0 +1,40 @@
+# .gitignore for Healthcare Triage with Pinecone
+
+# Node.js dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+coverage/
+
+# Optional files you might want to ignore
+data.txt  # If it contains sensitive data
+test.js   # If these are temporary test files
