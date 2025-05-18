@@ -41,15 +41,17 @@ node pine_Index.js
 
 ## API Endpoints (Test in Postman API)
 4. **POST/submit**
-   Purpose:
-   Submit a symptom → Classifies it → Embeds it → Stores in Pinecone.
+5. **Purpose:**
+
+6. Submit a symptom → Classifies it → Embeds it → Stores in Pinecone.
    ```bash
    {
     "description": "Shortness of breath and chest pain"
    }
    ```
-  Response: 
-  ```bash
+7. **Response:** 
+  
+8.  ```bash
     {
         "success": true,
         "data": {
@@ -63,17 +65,20 @@ node pine_Index.js
         }
     }
     ```
-5. **POST/rag-triage**
-    Purpose:
-    Returns a triage recommendation using similar past reports (RAG).
-    Request:
-    ```bash
+9. **POST/rag-triage**
+10. **Purpose:**
+
+11. Returns a triage recommendation using similar past reports (RAG).
+12. **Request:**
+
+13. ```bash
     {
         "description": "Persistent coughing with mild fever"
     }
     ```
-    Response:
-    ```bash
+14. **Response:**
+
+15. ```bash
     {
     "recommendation": "Based on the symptoms ... this appears to require Urgent Care.",
     "similar_cases": [
