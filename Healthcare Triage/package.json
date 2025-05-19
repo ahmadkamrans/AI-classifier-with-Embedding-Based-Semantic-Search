@@ -1,0 +1,17 @@
+{
+  "name": "ai-mvp-full-phase1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@pinecone-database/pinecone": "latest",
+    "@supabase/supabase-js": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "langchain": "latest",
+    "openai": "latest"
+  }
+}
