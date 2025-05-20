@@ -1,4 +1,4 @@
-// utils/keywords.js (optional separate file)
+// utils/keywords.js (remains largely the same as it's more about database operations)
 function extractKeywords(description) {
   return description
     .toLowerCase()

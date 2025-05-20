@@ -6,12 +6,15 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.43",
+    "@langchain/core": "^0.3.56",
+    "@langchain/openai": "^0.5.10",
     "@pinecone-database/pinecone": "latest",
-    "@supabase/supabase-js": "latest",
-    "cors": "latest",
+    "@supabase/supabase-js": "^2.49.7",
+    "cors": "^2.8.5",
     "dotenv": "latest",
-    "express": "latest",
-    "langchain": "latest",
-    "openai": "latest"
+    "express": "^5.1.0",
+    "langchain": "^0.3.26",
+    "openai": "^4.100.0"
   }
 }
