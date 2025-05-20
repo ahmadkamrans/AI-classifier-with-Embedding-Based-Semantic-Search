@@ -12,15 +12,7 @@ app.use(express.json());
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Allowed triage labels
-const VALID_LABELS = [
-  "Emergency",
-  "Urgent Care",
-  "Non-Urgent",
-  "Follow-Up Needed",
-  "Allergy",
-  "Infection",
-];
+const VALID_URGENCY = ["Emergency", "Urgent Care", "Non-Urgent", "Follow-Up Needed"];
 
 async function retryClassification(prompt, retries = 3, delay = 2000) {
   for (let i = 0; i < retries; i++) {
@@ -52,7 +44,6 @@ app.post("/submit", async (req, res) => {
     const isHealth = await isLikelyHealthRelated(description, supabase);
 
     if (!isHealth) {
-      // Fallback to OpenAI for edge case health validation
       const checkRelevance = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -68,29 +59,41 @@ app.post("/submit", async (req, res) => {
       }
     }
 
-    // Classification
-    const prompt = `Classify this patient symptom into one of the following categories: [Emergency, Urgent Care, Non-Urgent, Follow-Up Needed, Allergy, Infection]. Only return the label.\n\nSymptom: "${description}"`;
+    const prompt = `Classify the following symptom description into two parts:
+                    1. Urgency Level: Choose one of [Emergency, Urgent Care, Non-Urgent, Follow-Up Needed]
+                    2. Category: Choose from [Allergy, Infection, Flu, Injury, Pain, Cardiac, etc.]
+
+                    Respond in this format:
+                    Urgency Level: <urgency>
+                    Category: <category>
+
+    Symptom: "${description}"`;
 
     const classification = await retryClassification(prompt);
-    const triage_level = classification.choices[0].message.content.trim();
+    const output = classification.choices[0].message.content.trim();
 
-    if (!VALID_LABELS.includes(triage_level)) {
-      return res.status(500).json({ error: "Invalid classification label received." });
+    const urgencyMatch = output.match(/Urgency Level:\s*(.*)/i);
+    const categoryMatch = output.match(/Category:\s*(.*)/i);
+
+    const urgency_level = urgencyMatch?.[1]?.trim();
+    const category = categoryMatch?.[1]?.trim();
+
+    if (!VALID_URGENCY.includes(urgency_level) || !category) {
+      return res.status(500).json({ error: "Invalid classification labels received." });
     }
 
-    // Embedding
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: description,
     });
 
     const embedding = embeddingResponse.data[0].embedding;
-    
-    // Save
+
     const { error } = await supabase.from("symptom_reports").insert([
       {
         symptom_description: description,
-        triage_level,
+        urgency_level,
+        category,
         embedding,
         status: "success",
       },
@@ -101,11 +104,10 @@ app.post("/submit", async (req, res) => {
       return res.status(500).json({ error: "Failed to save report to database." });
     }
 
-    // Learn new keywords
     await insertNewKeywords(description, supabase);
 
-    res.json({ success: true, triage_level });
-    } catch (error) {
+    res.json({ success: true, urgency_level, category });
+  } catch (error) {
     console.error("Error in submission route:", error);
 
     const isRateLimitError =
@@ -119,11 +121,11 @@ app.post("/submit", async (req, res) => {
       });
     }
 
-    // Log failure in Supabase
     await supabase.from("symptom_reports").insert([
       {
         symptom_description: description,
-        triage_level: null,
+        urgency_level: null,
+        category: null,
         embedding: null,
         status: "failed",
         error_message: error.message,
@@ -134,8 +136,6 @@ app.post("/submit", async (req, res) => {
   }
 });
 
-
-// Semantic search endpoint
 app.post("/semantic-search", async (req, res) => {
   const { description } = req.body;
 
@@ -144,7 +144,6 @@ app.post("/semantic-search", async (req, res) => {
   }
 
   try {
-    // 1. Generate embedding
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: description,
@@ -152,7 +151,6 @@ app.post("/semantic-search", async (req, res) => {
 
     const embedding = embeddingResponse.data[0].embedding;
 
-    // 2. Query Supabase using a stored procedure
     const { data, error } = await supabase.rpc("match_symptoms", {
       query_embedding: embedding,
       match_count: 5,
@@ -170,7 +168,6 @@ app.post("/semantic-search", async (req, res) => {
   }
 });
 
-// Fetch all symptom reports
 app.get("/reports", async (req, res) => {
   const { data, error } = await supabase
     .from("symptom_reports")
@@ -185,5 +182,4 @@ app.get("/reports", async (req, res) => {
   res.json(data);
 });
 
-// Start the server
 app.listen(3001, () => console.log("Server running on http://localhost:3001"));
