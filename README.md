@@ -1,60 +1,82 @@
-<h1>Healthcare Triage AI – Semantic Symptom Search</h1>
+<h1>🩺 Healthcare Triage AI</h1>
 
-  <p>
-    This project is a Minimal Viable Product (MVP) for a Healthcare Triage AI system. It uses OpenAI embeddings, Supabase with pgvector support, and optionally Pinecone for fast and scalable semantic search.
-  </p>
+<p>
+An AI-powered triage system built using <strong>LangChain</strong>, <strong>Supabase</strong>, <strong>OpenAI</strong>, and <strong>Express.js</strong> to classify and validate symptom descriptions. It categorizes urgency, classifies symptom types, stores them with embeddings, and supports semantic search.
+</p>
 
-  <hr />
+<h2>🚀 Features</h2>
+<ul>
+  <li>✅ Validates whether input is health-related</li>
+  <li>📊 Classifies urgency level and symptom category using OpenAI GPT</li>
+  <li>🧠 Generates text embeddings with OpenAI</li>
+  <li>📥 Stores data and embeddings in Supabase</li>
+  <li>🔎 Performs semantic search over symptom reports using LangChain + SupabaseVectorStore</li>
+</ul>
 
-  <h2>What This Project Does</h2>
-  <ul>
-    <li>Generates vector embeddings from patient symptom descriptions using OpenAI.</li>
-    <li>Stores those embeddings in Supabase’s Postgres database with pgvector enabled.</li>
-    <li>Defines a PostgreSQL function to find and return similar historical symptom records based on vector similarity.</li>
-    <li>Includes an optional script to migrate stored vectors from Supabase to Pinecone for high-performance search use cases.</li>
-  </ul>
+<h2>⚠️ Edge Cases Handled</h2>
+<ul>
+  <li>⛔ Empty or invalid descriptions</li>
+  <li>🤖 Non-health-related inputs are rejected</li>
+  <li>🔁 Retry mechanism for classification errors (e.g. OpenAI failure)</li>
+  <li>🧯 Handles OpenAI rate limits gracefully</li>
+  <li>❌ Validates that urgency level is among predefined categories</li>
+  <li>💥 Logs and stores failed insertions with error messages in Supabase</li>
+</ul>
 
-  <hr />
+<h2>📁 Project Structure</h2>
+<pre>
+.
+├── index.js
+├── routes/
+│   ├── submit.js
+│   ├── semanticSearch.js
+│   └── reports.js
+├── langchain/
+│   ├── classifier.js
+│   ├── embedding.js
+│   └── validator.js
+├── utils/
+│   └── keyword.js
+├── .env
+└── package.json
+</pre>
 
-  <h2>Setup Instructions</h2>
+<h2>⚙️ Setup Instructions</h2>
 
-  <h3>1️⃣ Clone the Repository</h3>
-  <p>Use <strong>git clone</strong> to download the project locally.</p>
+<ol>
+  <li>Clone the repository</li>
+  <pre><code>git clone https://github.com/your-username/healthcare-triage-ai.git
+cd healthcare-triage-ai</code></pre>
 
-  <h3>2️⃣ Install Dependencies</h3>
-  <p>Run <strong>npm install</strong> to install the required packages.</p>
+  <li>Install dependencies</li>
+  <pre><code>npm install</code></pre>
 
-  <h3>3️⃣ Add Environment Variables</h3>
-  <p>
-    Create a <code>.env</code> file and provide your Supabase keys, Pinecone API key, and OpenAI API key.
-  </p>
+  <li>Create a <code>.env</code> file at the root using the template below</li>
 
-  <hr />
+  <li>Run the server</li>
+  <pre><code>node index.js</code></pre>
+</ol>
 
-  <h2>🔍 Code Flow Overview</h2>
+<h2>🌐 API Endpoints</h2>
+<ul>
+  <li><code>POST /submit</code> - Submit a symptom for validation and classification</li>
+  <li><code>POST /semantic-search</code> - Search similar symptom reports</li>
+  <li><code>GET /reports</code> - Fetch all stored symptom reports</li>
+</ul>
 
-  <ol>
-    <li>The backend receives a user’s symptom description via an API request.</li>
-    <li>It sends the description to OpenAI to generate a semantic embedding vector.</li>
-    <li>This vector is passed into a custom SQL function (<code>match_symptoms</code>) in Supabase.</li>
-    <li>The SQL function returns the most similar stored symptom reports based on vector similarity using <code><=></code> operator.</li>
-    <li>Results are returned to the frontend with similarity scores for triage recommendation.</li>
-  </ol>
+<h2>📄 .env Template</h2>
+<pre><code>OPENAI_API_KEY=your-openai-api-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-service-role-key
+</code></pre>
 
-  <hr />
+<h2>🧪 Tech Stack</h2>
+<ul>
+  <li>🟢 Node.js + Express.js</li>
+  <li>🧠 OpenAI GPT-4o (LangChain wrapper)</li>
+  <li>📦 Supabase (Database + Vector Store)</li>
+  <li>📐 LangChain (prompt pipelines, embeddings, vector search)</li>
+</ul>
 
-  <h2>✅ Technologies Used</h2>
-  <ul>
-    <li>Node.js & Express – Server and API</li>
-    <li>OpenAI API – Embedding generation</li>
-    <li>Supabase (PostgreSQL + pgvector) – Vector storage & similarity search</li>
-  </ul>
-
-  <hr />
-
-  <h2>📌 Notes</h2>
-  <ul>
-    <li>The system supports both local vector search via Supabase and external search via Pinecone.</li>
-    <li>Ensure that your Supabase database has the <code>pgvector</code> extension enabled.</li>
-    <li>For production use, consider adding error handling and authentication for secure usage.</li>
-  </ul>
+<h2>🛡️ License</h2>
+<p>MIT License</p>
