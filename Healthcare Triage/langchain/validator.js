@@ -1,26 +1,25 @@
-const { ChatOpenAI } = require("langchain/chat_models");
-const { PromptTemplate } = require("langchain/prompts");
-const { StringOutputParser } = require("langchain/schema/output_parser");
+const { PromptTemplate } = require("@langchain/core/prompts");
+const { StringOutputParser } = require("@langchain/core/output_parsers");
+const { ChatOpenAI } = require("@langchain/openai");
 
-const model = new ChatOpenAI({
-  modelName: "gpt-4o",
-  temperature: 0,
-});
-
-const prompt = PromptTemplate.fromTemplate(`
-  You are a strict health input validator. Only answer Yes or No.
-
+const healthCheckPrompt = PromptTemplate.fromTemplate(
+  `You are a strict health input validator. Only answer Yes or No.
   Is the following input describing a health-related symptom?
 
-  "{description}"
-`);
+  "{description}"`
+);
 
-const parser = new StringOutputParser();
+const llm = new ChatOpenAI({
+  modelName: "gpt-4o",
+  temperature: 0,
+  openAIApiKey: process.env.OPENAI_API_KEY,
+});
 
-const validateSymptom = async (description) => {
-  const chain = prompt.pipe(model).pipe(parser);
-  const result = await chain.invoke({ description });
+const healthCheckChain = healthCheckPrompt.pipe(llm).pipe(new StringOutputParser());
+
+async function isHealthRelated(description) {
+  const result = await healthCheckChain.invoke({ description });
   return result.trim().toLowerCase().startsWith("yes");
-};
+}
 
-module.exports = { validateSymptom };
+module.exports = { isHealthRelated };

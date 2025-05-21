@@ -1,34 +1,37 @@
-const { ChatOpenAI } = require("langchain/chat_models");
-const { PromptTemplate } = require("langchain/prompts");
-const { StringOutputParser } = require("langchain/schema/output_parser");
+const { PromptTemplate } = require("@langchain/core/prompts");
+const { StringOutputParser } = require("@langchain/core/output_parsers");
+const { ChatOpenAI } = require("@langchain/openai");
 
-
-const model = new ChatOpenAI({
-  modelName: "gpt-4o",
-  temperature: 0,
-});
-
-const prompt = PromptTemplate.fromTemplate(`
-  Classify the following symptom description into two parts:
+const classificationPrompt = PromptTemplate.fromTemplate(
+  `Classify the following symptom description into two parts:
   1. Urgency Level: Choose one of [Emergency, Urgent Care, Non-Urgent, Follow-Up Needed]
   2. Category: Choose from [Allergy, Infection, Flu, Injury, Pain, Cardiac, etc.]
 
   Respond in this format:
   Urgency Level: <urgency>
   Category: <category>
-Symptom: "{description}"
-`);
 
-const parser = new StringOutputParser();
+  Symptom: "{description}"`
+);
 
-const classifySymptom = async (description) => {
-  const chain = prompt.pipe(model).pipe(parser);
-  const result = await chain.invoke({ description });
+const llm = new ChatOpenAI({
+  modelName: "gpt-4o",
+  temperature: 0,
+  openAIApiKey: process.env.OPENAI_API_KEY,
+});
 
-  const urgency = result.match(/Urgency Level:\s*(.*)/i)?.[1]?.trim();
-  const category = result.match(/Category:\s*(.*)/i)?.[1]?.trim();
+const chain = classificationPrompt.pipe(llm).pipe(new StringOutputParser());
 
-  return { urgency, category, raw: result };
-};
+async function retryClassification(description, retries = 3, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const output = await chain.invoke({ description });
+      return output;
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+}
 
-module.exports = { classifySymptom };
+module.exports = { retryClassification };

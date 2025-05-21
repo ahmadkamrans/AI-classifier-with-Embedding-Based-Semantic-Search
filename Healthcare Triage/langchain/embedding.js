@@ -1,13 +1,12 @@
-const { OpenAIEmbeddings } = require("langchain/embeddings");
-
+const { OpenAIEmbeddings } = require("@langchain/openai");
 
 const embeddings = new OpenAIEmbeddings({
   modelName: "text-embedding-3-small",
+  openAIApiKey: process.env.OPENAI_API_KEY,
 });
 
-const getEmbedding = async (text) => {
-  const [embed] = await embeddings.embedDocuments([text]);
-  return embed;
-};
+async function generateEmbedding(text) {
+  return await embeddings.embedQuery(text);
+}
 
-module.exports = { getEmbedding };
+module.exports = { generateEmbedding, embeddings };
